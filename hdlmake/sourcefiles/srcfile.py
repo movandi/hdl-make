@@ -325,6 +325,8 @@ def create_source_file(path, module, library=None, include_dirs=None):
     # Remove '.'
     extension = extension[1:]
     logging.debug("add file " + path)
+    logging.debug(f" library: {library}")
+    logging.debug(f" include: {include_dirs}")
 
     if extension in ['vhd', 'vhdl', 'vho']:
         new_file = VHDLFile(path=path,

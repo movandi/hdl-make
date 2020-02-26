@@ -187,8 +187,8 @@ class Module(object):
         if self.parent is None:
             include_dirs = self.manifest_dict.get('include_dirs', [])
         else:
-            include_dirs = self.top_manifest.manifest_dict.get(
-                'include_dirs', [])
+            include_dirs = self.top_manifest.manifest_dict.get('include_dirs', [])
+            include_dirs.extend(self._make_list_of_paths(self.manifest_dict.get('include_dirs', [])))
         for path_aux in paths:
             if os.path.isdir(path_aux):
                 # If a path is a dir, add all the files of that dir.
