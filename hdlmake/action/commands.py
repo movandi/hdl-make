@@ -158,7 +158,10 @@ class Commands(Action):
         self.solve_file_set()
         file_list = dep_solver.make_dependency_sorted_list(
             self.parseable_fileset)
-        files_str = [file_aux.path for file_aux in file_list]
+        #files_str = [file_aux.path for file_aux in file_list]
+        # TODO: use a format string
+        # hdlmake list-files --format "{library}:{file} +{include_dirs}"
+        files_str = [f"{file_aux.library}:{file_aux.path} {' +'.join(file_aux.include_dirs)}"  for file_aux in file_list]
         if self.options.reverse is True:
             files_str.reverse()
         if self.options.delimiter is None:
