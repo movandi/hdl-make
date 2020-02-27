@@ -50,16 +50,15 @@ class ToolXceliumSim(MakefileSim):
 
     HDL_FILES = {VerilogFile: '', VHDLFile: '', SVFile: ''}
 
-    CLEAN_TARGETS = {'clean': ['cds.lib','xcelium.d','xmvlog.log','hdl.var'],
+    CLEAN_TARGETS = {'clean': ['cds.lib', 'xm*.log','hdl.var'],
                      'mrproper': []}
 
-    SIMULATOR_CONTROLS = {'vlog':  'xmvlog     $<',
-                          'svlog': 'xmvlog -sv $<',
-                          'vhdl':  'xmvhdl $<',
-                          'run':   'xmsim',
-                          'debug': 'xmsim -gui -access +rwc',
-                          'cdslib':  'cds.lib',
-                          'compiler': 'xmelab -access +r -v200x -vhdlsync $(TOP_MODULE) ',
+    SIMULATOR_CONTROLS = {'vlog' : 'xmvlog -quiet -64bit $(VLOG_FLAGS) $<',
+                          'svlog': 'xmvlog -quiet -64bit $(VLOG_FLAGS) -sv $<',
+                          'vhdl' : 'xmvhdl -quiet -64bit $(VCOM_FLAGS) $<',
+                          'map'  : 'xmelab -quiet -64bit $(VMAP_FLAGS) -timescale 1ns/10ps $(TOP_MODULE) ',
+                          'run'  : 'xmsim  -quiet -64bit $(VSIM_FLAGS) $(TOP_MODULE) ',
+                          'cdslib':'cds.lib',
                           'incdir':'-incdir '}
 
     def __init__(self):
@@ -72,20 +71,6 @@ class ToolXceliumSim(MakefileSim):
         # These are files copied into your working directory by a make rule
         # The key is the filename, the value is the file source path
         self.copy_rules = {}
-
-    def _makefile_sim_compilation(self):
-        """Generate compile simulation Makefile target for xcelium Simulator"""
-
-        self.writeln("")
-        self.writeln("")
-        self.writeln("VLOGCOMP_FLAGS := \\")
-        for inc in self.manifest_dict.get("include_dirs", []):
-            self.writeln("\t\t-incdir " + inc + "\\")
-        self.writeln("")
-        self.writeln("simulation: $(VERILOG_OBJ) $(VHDL_OBJ)")
-        self.writeln("\t\t" + self.SIMULATOR_CONTROLS['compiler'])
-        self.writeln()
-        self._makefile_sim_dep_files()
 
     def _makefile_sim_options(self):
         """Print the vsim options to the Makefile"""
@@ -100,6 +85,9 @@ class ToolXceliumSim(MakefileSim):
         self.writeln("VSIM_FLAGS := %s" % vsim_flags)
         self.writeln("VLOG_FLAGS := %s" % vlog_flags)
         self.writeln("VMAP_FLAGS := %s" % vmap_flags)
+
+        sim_post_cmd = self.manifest_dict.get("sim_post_cmd", '')
+        self.manifest_dict["sim_post_cmd"] = '\n\t\t'.join([self.SIMULATOR_CONTROLS['map'], self.SIMULATOR_CONTROLS['run'], sim_post_cmd])
 
     def _makefile_sim_compilation(self):
         """Write a properly formatted Makefile for the simulator.
@@ -141,7 +129,7 @@ class ToolXceliumSim(MakefileSim):
         for lib in libs:
             libpath=lib
             self.write(libpath + shell.makefile_slash_char() + "." + lib + ":\n")
-            self.writeln("\t\techo define {lib} {libpath}>>{cdslib}"
+            self.writeln("\t\t@echo define {lib} {libpath}>>{cdslib}"
                          "".format(
                 lib=lib, libpath=libpath, cdslib=self.SIMULATOR_CONTROLS['cdslib'],
                 touch=shell.touch_command(), slash=shell.makefile_slash_char(),
@@ -167,13 +155,8 @@ class ToolXceliumSim(MakefileSim):
             self._makefile_touch_stamp_file()
             self.writeln()
 
-
-        self.writeln("run:")
-        self.writeln("\t\t{cmd} work.{top}".format(
-            cmd=self.SIMULATOR_CONTROLS['run'], top=self.manifest_dict.get("sim_top")))
+        self.writeln("debug:VMAP_FLAGS+= -access +rwc")
+        self.writeln("debug:VSIM_FLAGS+= -gui")
+        self.writeln("debug:local")
         self.writeln()
 
-        self.writeln("debug:")
-        self.writeln("\t\t{cmd} work.{top}".format(
-            cmd=self.SIMULATOR_CONTROLS['debug'], top=self.manifest_dict.get("sim_top")))
-        self.writeln()
