@@ -50,7 +50,7 @@ class ToolXceliumSim(MakefileSim):
 
     HDL_FILES = {VerilogFile: '', VHDLFile: '', SVFile: ''}
 
-    CLEAN_TARGETS = {'clean': ['cds.lib', 'xm*.log','hdl.var'],
+    CLEAN_TARGETS = {'clean': ['cds.lib', 'xm*.log','hdl.var', '.simvision', 'xmsim.key'],
                      'mrproper': []}
 
     SIMULATOR_CONTROLS = {'vlog' : 'xmvlog -quiet -64bit $(VLOG_FLAGS) $<',
