@@ -161,7 +161,7 @@ class ToolXceliumSim(MakefileSim):
         for vhdl in fileset.filter(VHDLFile).sort():
             self._makefile_sim_file_rule(vhdl)
             self.writeln("\t\t{vhdltool} $(VCOM_FLAGS) -work {library} $< ".format(
-                vhdlstool=self.SIMULATOR_CONTROLS['vhdl'], library=vhdl.library))
+                vhdltool=self.SIMULATOR_CONTROLS['vhdl'], library=vhdl.library))
             self._makefile_touch_stamp_file()
             self.writeln()
 
