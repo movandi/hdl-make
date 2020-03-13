@@ -123,12 +123,22 @@ class ToolXceliumSim(MakefileSim):
             self.writeln("\t\t{} $< . 2>&1".format(shell.copy_command()))
 
         self.writeln("hdl.var:")
-        self._makefile_touch_stamp_file()
+        try:
+            self.writeln("\t\t{} {cdspath}/$@ . 2>&1 || rm $@ || touch $@".format(shell.copy_command(), cdspath=os.environ.get("CDS_SITE")))
+        except:
+            self._makefile_touch_stamp_file()
+        self.writeln()
+
+        self.writeln("cds.lib:")
+        try:
+            self.writeln("\t\t{} {cdspath}/$@ . 2>&1 || rm $@ || touch $@".format(shell.copy_command(), cdspath=os.environ.get("CDS_SITE")))
+        except:
+            self._makefile_touch_stamp_file()
         self.writeln()
 
         for lib in libs:
             libpath=lib
-            self.write(libpath + shell.makefile_slash_char() + "." + lib + ":\n")
+            self.write(libpath + shell.makefile_slash_char() + "." + lib + ":cds.lib\n")
             self.writeln("\t\t@echo define {lib} {libpath}>>{cdslib}"
                          "".format(
                 lib=lib, libpath=libpath, cdslib=self.SIMULATOR_CONTROLS['cdslib'],
