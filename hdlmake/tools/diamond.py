@@ -26,7 +26,7 @@
 
 from __future__ import absolute_import
 from .makefilesyn import MakefileSyn
-from ..sourcefiles.srcfile import EDFFile, LPFFile, VHDLFile, VerilogFile
+from ..sourcefiles.srcfile import EDFFile, LPFFile, VHDLFile, VerilogFile, SVFile
 
 
 class ToolDiamond(MakefileSyn):
@@ -51,7 +51,9 @@ class ToolDiamond(MakefileSyn):
 
     HDL_FILES = {
         VHDLFile: _LATTICE_SOURCE.format('add'),
-        VerilogFile: _LATTICE_SOURCE.format('add')}
+        VerilogFile: _LATTICE_SOURCE.format('add'),
+        SVFile: _LATTICE_SOURCE.format('add')
+        }
 
     CLEAN_TARGETS = {'clean': ["*.sty", "$(PROJECT)"],
                      'mrproper': ["*.jed"]}
