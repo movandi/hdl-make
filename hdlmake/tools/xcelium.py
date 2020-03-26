@@ -99,7 +99,8 @@ class ToolXceliumSim(MakefileSim):
             self.writeln("INCLUDE_DIRS :=")
         else:
             self.writeln("INCLUDE_DIRS := %s" %
-                ((' '+self.SIMULATOR_CONTROLS['incdir']).join(self.manifest_dict.get("include_dirs"))))
+#                ((' '+self.SIMULATOR_CONTROLS['incdir']).join(self.manifest_dict.get("include_dirs"))))
+                (" ".join([self.SIMULATOR_CONTROLS['incdir']+d for d in self.manifest_dict.get("include_dirs")])))
         libs = sorted(set(f.library for f in fileset))
         self.write('LIBS := ')
         self.write(' '.join(libs))
@@ -123,15 +124,21 @@ class ToolXceliumSim(MakefileSim):
             self.writeln("\t\t{} $< . 2>&1".format(shell.copy_command()))
 
         self.writeln("hdl.var:")
+        cdspath = os.environ.get("CDS_SITE")
+        if not cdspath:
+            cdshome=os.environ.get("VRST_HOME")
+            if cdshome:
+              cdspath=cdshome+"/tools.lnx86/xcelium/files/"
         try:
-            self.writeln("\t\t{} {cdspath}/$@ . 2>&1 || rm $@ || touch $@".format(shell.copy_command(), cdspath=os.environ.get("CDS_SITE")))
+            self.writeln("\t\techo \"SOFTINCLUDE {cdspath}/$@\" > $@".format(shell.copy_command(), cdspath=cdspath))
         except:
             self._makefile_touch_stamp_file()
         self.writeln()
 
         self.writeln("cds.lib:")
         try:
-            self.writeln("\t\t{} {cdspath}/$@ . 2>&1 || rm $@ || touch $@".format(shell.copy_command(), cdspath=os.environ.get("CDS_SITE")))
+            self.writeln("\t\techo \"SOFTINCLUDE {cdspath}/$@\" > $@".format(shell.copy_command(), cdspath=cdspath))
+            #self.writeln("\t\t{} {cdspath}/$@ . 2>&1 || rm $@ || touch $@".format(shell.copy_command(), cdspath=cdspath))
         except:
             self._makefile_touch_stamp_file()
         self.writeln()
@@ -150,7 +157,7 @@ class ToolXceliumSim(MakefileSim):
         for vlog in fileset.filter(VerilogFile).sort():
             self._makefile_sim_file_rule(vlog)
             incdirs=" ".join([self.SIMULATOR_CONTROLS['incdir']+d for d in vlog.include_dirs])
-            self.writeln("\t\t{vlogtool} -work {library} $(VLOG_FLAGS) $(INCLUDE_DIRS) {incdirs} $<".format(
+            self.writeln("\t\t{vlogtool} -work {library} {incdirs} $(INCLUDE_DIRS)".format(
                 vlogtool=self.SIMULATOR_CONTROLS['svlog'] if isinstance(vlog, SVFile) else self.SIMULATOR_CONTROLS['vlog'],
                 library=vlog.library,
                 incdirs=incdirs,
@@ -160,7 +167,7 @@ class ToolXceliumSim(MakefileSim):
         # list rules for all _primary.dat files for vhdl
         for vhdl in fileset.filter(VHDLFile).sort():
             self._makefile_sim_file_rule(vhdl)
-            self.writeln("\t\t{vhdltool} $(VCOM_FLAGS) -work {library} $< ".format(
+            self.writeln("\t\t{vhdltool} -work {library}".format(
                 vhdltool=self.SIMULATOR_CONTROLS['vhdl'], library=vhdl.library))
             self._makefile_touch_stamp_file()
             self.writeln()
