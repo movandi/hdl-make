@@ -116,6 +116,9 @@ class ToolXceliumSim(MakefileSim):
         self.writeln(
             "simulation: %s $(LIB_IND) $(VERILOG_OBJ) $(VHDL_OBJ)" %
             (' '.join(self.additional_deps)),)
+        self.writeln("\t\t{tool}".format(
+            tool=self.SIMULATOR_CONTROLS['run']))
+        self.writeln()
         self.writeln("$(VERILOG_OBJ): " + ' '.join(self.additional_deps))
         self.writeln("$(VHDL_OBJ): $(LIB_IND) " + ' '.join(self.additional_deps))
         self.writeln()
@@ -174,6 +177,8 @@ class ToolXceliumSim(MakefileSim):
 
         self.writeln("debug:VMAP_FLAGS+= -access +rwc")
         self.writeln("debug:VSIM_FLAGS+= -gui")
-        self.writeln("debug:local")
+        self.writeln("debug: sim_pre_cmd simulation sim_post_cmd")
+        self.writeln("local:VSIM_FLAGS+= -batch")
+
         self.writeln()
 
