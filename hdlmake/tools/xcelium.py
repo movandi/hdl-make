@@ -126,23 +126,22 @@ class ToolXceliumSim(MakefileSim):
             self.writeln("{}: {}".format(filename, filesource))
             self.writeln("\t\t{} $< . 2>&1".format(shell.copy_command()))
 
-        self.writeln("hdl.var:")
         cdspath = os.environ.get("CDS_SITE")
         if not cdspath:
             cdshome=os.environ.get("VRST_HOME")
             if cdshome:
-              cdspath=cdshome+"/tools.lnx86/xcelium/files/"
-        try:
-            self.writeln("\t\techo \"SOFTINCLUDE {cdspath}/$@\" > $@".format(shell.copy_command(), cdspath=cdspath))
-        except:
+                cdspath=cdshome+"/tools.lnx86/xcelium/files/"
+
+        if cdspath:
+            self.writeln("\t\techo \"SOFTINCLUDE {cdspath}/$@\" > $@".format(cdspath=cdspath))
+        else:
             self._makefile_touch_stamp_file()
         self.writeln()
 
-        self.writeln("cds.lib:")
-        try:
-            self.writeln("\t\techo \"SOFTINCLUDE {cdspath}/$@\" > $@".format(shell.copy_command(), cdspath=cdspath))
-            #self.writeln("\t\t{} {cdspath}/$@ . 2>&1 || rm $@ || touch $@".format(shell.copy_command(), cdspath=cdspath))
-        except:
+        self.writeln("cds.lib:Makefile")
+        if cdspath:
+            self.writeln("\t\techo \"SOFTINCLUDE {cdspath}/$@\" > $@".format(cdspath=cdspath))
+        else:
             self._makefile_touch_stamp_file()
         self.writeln()
 
