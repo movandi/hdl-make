@@ -109,9 +109,9 @@ class ToolXceliumSim(MakefileSim):
         self.write('LIB_IND := ')
         self.write(' '.join([lib + shell.makefile_slash_char() +
                    "." + lib for lib in libs]))
-        #self.write(" ".join(['cds.lib', 'hdl.var']))
         self.write(" hdl.var")
         self.write(" cds.lib")
+        self.write(" $(MAKEFILE_LIST)")
         self.write('\n')
         self.writeln()
         self.writeln(
