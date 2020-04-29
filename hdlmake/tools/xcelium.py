@@ -111,6 +111,7 @@ class ToolXceliumSim(MakefileSim):
                    "." + lib for lib in libs]))
         #self.write(" ".join(['cds.lib', 'hdl.var']))
         self.write(" hdl.var")
+        self.write(" cds.lib")
         self.write('\n')
         self.writeln()
         self.writeln(
@@ -119,7 +120,7 @@ class ToolXceliumSim(MakefileSim):
         self.writeln("\t\t{tool}".format(
             tool=self.SIMULATOR_CONTROLS['run']))
         self.writeln()
-        self.writeln("$(VERILOG_OBJ): " + ' '.join(self.additional_deps))
+        self.writeln("$(VERILOG_OBJ): $(LIB_IND) " + ' '.join(self.additional_deps))
         self.writeln("$(VHDL_OBJ): $(LIB_IND) " + ' '.join(self.additional_deps))
         self.writeln()
         for filename, filesource in six.iteritems(self.copy_rules):
@@ -130,29 +131,30 @@ class ToolXceliumSim(MakefileSim):
         if not cdspath:
             cdshome=os.environ.get("VRST_HOME")
             if cdshome:
-                cdspath=cdshome+"/tools.lnx86/xcelium/files/"
+                cdspath=cdshome+"/tools.lnx86/xcelium/files"
 
+        self.writeln("hdl.var:")
         if cdspath:
             self.writeln("\t\techo \"SOFTINCLUDE {cdspath}/$@\" > $@".format(cdspath=cdspath))
         else:
             self._makefile_touch_stamp_file()
         self.writeln()
 
-        self.writeln("cds.lib:Makefile")
+        self.writeln("cds.lib:")
         if cdspath:
             self.writeln("\t\techo \"SOFTINCLUDE {cdspath}/$@\" > $@".format(cdspath=cdspath))
         else:
             self._makefile_touch_stamp_file()
+        for lib in libs:
+            libpath=lib
+            self.writeln("\t\t@echo define {lib} {libpath}>>{cdslib}".format(
+                lib=lib, libpath=libpath, cdslib=self.SIMULATOR_CONTROLS['cdslib'],
+                touch=shell.touch_command(), slash=shell.makefile_slash_char(), rm=shell.del_command()))
         self.writeln()
 
         for lib in libs:
             libpath=lib
-            self.write(libpath + shell.makefile_slash_char() + "." + lib + ":cds.lib\n")
-            self.writeln("\t\t@echo define {lib} {libpath}>>{cdslib}"
-                         "".format(
-                lib=lib, libpath=libpath, cdslib=self.SIMULATOR_CONTROLS['cdslib'],
-                touch=shell.touch_command(), slash=shell.makefile_slash_char(),
-                rm=shell.del_command()))
+            self.write(libpath + shell.makefile_slash_char() + "." + lib + ":\n")
             self._makefile_touch_stamp_file()
             self.writeln()
         # rules for all _primary.dat files for sv
