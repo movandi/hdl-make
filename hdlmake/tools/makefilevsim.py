@@ -123,7 +123,9 @@ class MakefileVsim(MakefileSim):
         # rules for all _primary.dat files for sv
         for vlog in fileset.filter(VerilogFile).sort():
             self._makefile_sim_file_rule(vlog)
-            self.writeln("\t\tvlog -work {library} $(VLOG_FLAGS) {sv_option} $(INCLUDE_DIRS) $<".format(
+            incdirs=" ".join(['+incdir+'+d for d in vlog.include_dirs])
+            self.writeln("\t\tvlog -work {library} $(VLOG_FLAGS) {sv_option} {incdirs} $(INCLUDE_DIRS) $<".format(
+                incdirs=incdirs,
                 library=vlog.library, sv_option="-sv" if isinstance(vlog, SVFile) else ""))
             self._makefile_touch_stamp_file()
             self.writeln()
