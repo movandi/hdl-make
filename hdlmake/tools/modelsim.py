@@ -27,6 +27,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 import os
 
+import logging
 from .makefilevsim import MakefileVsim
 
 
@@ -57,14 +58,19 @@ class ToolModelsim(MakefileVsim):
             # 1: standard modelsim override
             if "MODELSIM" in os.environ:
                 modelsim_ini_path = os.path.dirname(os.environ["MODELSIM"])
+                logging.info("%s found %s: %s", "modelsim.ini", "from MODELSIM envvar", modelsim_ini_path)
             # 2: use modelsim from install found by hdlmake (first vsim in path)
             elif self.manifest_dict['sim_path']:
                 modelsim_ini_path = os.path.join(
                     self.manifest_dict["sim_path"], "..")
+                logging.info("%s found %s: %s", "modelsim.ini", "from binary location", modelsim_ini_path)
             # 3: use cocotb override, when sim bin is set manually and sim_path is none
             else:
                 modelsim_ini_path = os.path.join(
                     "$(HDLMAKE_MODELSIM_PATH)", "..")
+                logging.info("%s found %s: %s", "modelsim.ini", "from HDLMAKE_MODELSIM_PATH", modelsim_ini_path)
+        else:
+            logging.info("%s found %s: %s", "modelsim.ini", "from manifest", modelsim_ini_path)
         self.custom_variables["MODELSIM_INI_PATH"] = modelsim_ini_path
         modelsim_ini = "-modelsimini modelsim.ini "
         vcom_opt = self.manifest_dict.get("vcom_opt", '')
