@@ -54,9 +54,14 @@ class ToolModelsim(MakefileVsim):
         """Print the Modelsim options to the Makefile"""
         modelsim_ini_path = self.manifest_dict.get("modelsim_ini_path")
         if modelsim_ini_path == None:
-            if self.manifest_dict['sim_path']:
+            # 1: standard modelsim override
+            if "MODELSIM" in os.environ:
+                modelsim_ini_path = os.path.dirname(os.environ["MODELSIM"])
+            # 2: use modelsim from install found by hdlmake (first vsim in path)
+            elif self.manifest_dict['sim_path']:
                 modelsim_ini_path = os.path.join(
                     self.manifest_dict["sim_path"], "..")
+            # 3: use cocotb override, when sim bin is set manually and sim_path is none
             else:
                 modelsim_ini_path = os.path.join(
                     "$(HDLMAKE_MODELSIM_PATH)", "..")
