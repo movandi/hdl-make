@@ -81,6 +81,12 @@ class MakefileVsim(MakefileSim):
         self.writeln("VLOG_FLAGS := %s" % vlog_flags)
         self.writeln("VMAP_FLAGS := %s" % vmap_flags)
 
+        self.writeln("VCOM := vcom")
+        self.writeln("VSIM := vsim")
+        self.writeln("VLOG := vlog")
+        self.writeln("VMAP := vmap")
+        self.writeln("VLIB := vlib")
+
     def _makefile_sim_compilation(self):
         """Write a properly formatted Makefile for the simulator.
         The Makefile format is shared, but flags, dependencies, clean rules,
@@ -105,7 +111,7 @@ class MakefileVsim(MakefileSim):
         self.writeln(
             "simulation: %s $(LIB_IND) $(VERILOG_OBJ) $(VHDL_OBJ)" %
             (' '.join(self.additional_deps)),)
-        self.writeln("\t\tvsim $(VSIM_FLAGS) $(TOP_MODULE)")
+        self.writeln("\t\t$(VSIM) $(VSIM_FLAGS) $(TOP_MODULE)")
         self.writeln()
         self.writeln("$(VERILOG_OBJ): " + ' '.join(self.additional_deps))
         self.writeln("$(VHDL_OBJ): $(LIB_IND) " + ' '.join(self.additional_deps))
@@ -115,7 +121,7 @@ class MakefileVsim(MakefileSim):
             self.writeln("\t\t{} $< . 2>&1".format(shell.copy_command()))
         for lib in libs:
             self.write(lib + shell.makefile_slash_char() + "." + lib + ":\n")
-            self.writeln("\t(vlib {lib} && vmap $(VMAP_FLAGS) {lib} "
+            self.writeln("\t($(VLIB) {lib} && $(VMAP) $(VMAP_FLAGS) {lib} "
                          "&& {touch} {lib}{slash}.{lib}) || {rm} {lib}".format(
                 lib=lib, touch=shell.touch_command(), slash=shell.makefile_slash_char(),
                 rm=shell.del_command()))
@@ -124,7 +130,7 @@ class MakefileVsim(MakefileSim):
         for vlog in fileset.filter(VerilogFile).sort():
             self._makefile_sim_file_rule(vlog)
             incdirs=" ".join(['+incdir+'+d for d in vlog.include_dirs])
-            self.writeln("\t\tvlog -work {library} $(VLOG_FLAGS) {sv_option} {incdirs} $(INCLUDE_DIRS) $<".format(
+            self.writeln("\t\t$(VLOG) -work {library} $(VLOG_FLAGS) {sv_option} {incdirs} $(INCLUDE_DIRS) $<".format(
                 incdirs=incdirs,
                 library=vlog.library, sv_option="-sv" if isinstance(vlog, SVFile) else ""))
             self._makefile_touch_stamp_file()
@@ -132,7 +138,7 @@ class MakefileVsim(MakefileSim):
         # list rules for all _primary.dat files for vhdl
         for vhdl in fileset.filter(VHDLFile).sort():
             self._makefile_sim_file_rule(vhdl)
-            self.writeln("\t\tvcom $(VCOM_FLAGS) -work {} $< ".format(vhdl.library))
+            self.writeln("\t\t$(VCOM) $(VCOM_FLAGS) -work {} $< ".format(vhdl.library))
             self._makefile_touch_stamp_file()
             self.writeln()
 
