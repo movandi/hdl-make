@@ -337,7 +337,7 @@ def create_source_file(path, module, library=None, include_dirs=None):
                                module=module,
                                library=library,
                                include_dirs=include_dirs)
-    elif extension == 'sv' or extension == 'svh':
+    elif extension == 'sv' or extension == 'svh' or extension == 'svp':
         new_file = SVFile(path=path,
                           module=module,
                           library=library,
