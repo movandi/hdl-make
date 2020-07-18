@@ -163,7 +163,19 @@ class Commands(Action):
         else:
             # TODO: use a format string
             # hdlmake list-files --format "{library}:{file} +{include_dirs}"
-            files_str = [f"{file_aux.library}:{file_aux.path} {' +'.join(file_aux.include_dirs)}"  for file_aux in file_list]
+            files_str = []
+            for f in file_list:
+                s = ""
+                if hasattr(f, "library"):
+                    s += f.library
+                else:
+                    s += "work"
+                s += ":"
+                s += path_mod.relpath(f.path)
+                if hasattr(f, "include_dirs"):
+                    for inc in f.include_dirs:
+                        s += ' +' + path_mod.relpath(inc)
+                files_str.append(s)
         if self.options.reverse is True:
             files_str.reverse()
         if self.options.delimiter is None:
