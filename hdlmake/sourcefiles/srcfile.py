@@ -332,7 +332,7 @@ def create_source_file(path, module, library=None, include_dirs=None):
         new_file = VHDLFile(path=path,
                             module=module,
                             library=library)
-    elif extension in ['v', 'vh', 'vo', 'vm']:
+    elif extension in ['v', 'vh', 'vo', 'vm', 'vp']:
         new_file = VerilogFile(path=path,
                                module=module,
                                library=library,
