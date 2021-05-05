@@ -150,10 +150,13 @@ class Module(object):
         """Check the provided filepath against several conditions"""
         if filepath:
             if path_mod.is_abs_path(filepath):
+                # Left as a warning incase an absolute path was used
+                # by mistake.
+                # Removed as fatal so that tool specific code can be
+                # added from a common location.
                 logging.warning(
                     "Specified path seems to be an absolute path: " +
-                    filepath + "\nOmitting.")
-                return False
+                    filepath)
             filepath = os.path.join(self.path, filepath)
             if not os.path.exists(filepath):
                 raise Exception(
